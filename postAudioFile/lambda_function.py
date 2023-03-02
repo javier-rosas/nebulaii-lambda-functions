@@ -52,7 +52,7 @@ def lambda_handler(event, context):
     #         'statusCode': 401,
     #         'body': 'Unauthorized'
     #     }
-    
+
     body = json.loads(event['body'])
     file = bytes(body['event'], encoding='UTF-8')
     res = upload_to_aws(bucket_name, file, 'test_file_3.json')
