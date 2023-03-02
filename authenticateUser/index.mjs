@@ -1,25 +1,23 @@
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
-export const handler = async(event) => {
-    const user = event.body.event;
-    return jwt.sign(
-      {user}, 
-      process.env.JWT_SECRET, 
-      { expiresIn: '1h'}, 
-      (err, token) => {
-      if (err) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify('Unable to authenticate user'),
-        }
-      } else {
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-              message: 'User Authenticated',
-              token
-            }),
-        }
-      }
-    })
+export const handler = async (event) => {
+  const data = JSON.parse(event.body);
+  const user = data.event.body.user;
+  try {
+    const token = await jwt.sign(user, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: "User authenticated",
+        token,
+      }),
+    };
+  } catch (err) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Unable to authenticate user" }),
+    };
+  }
 };
