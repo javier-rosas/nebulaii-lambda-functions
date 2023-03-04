@@ -4,7 +4,7 @@ export const handler = async (event) => {
   const data = JSON.parse(event.body);
   const user = data.event.body.user;
   try {
-    const token = await jwt.sign(user, process.env.JWT_SECRET, {
+    const token = jwt.sign(user, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
     return {
