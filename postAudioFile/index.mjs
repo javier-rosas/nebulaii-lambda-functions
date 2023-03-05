@@ -7,14 +7,11 @@ const bucketName = process.env.BUCKET_NAME;
 const jwtSecret = process.env.JWT_SECRET;
 
 /**
- * 
- * TODO::::::::
- * 
- * 1) line 29
- * 
- * 
- *  
- */
+Verifies the JWT token provided in the HTTP headers of the incoming request.
+@param {Object} options - The options for the middleware.
+@param {string} options.secret - The JWT secret key.
+@returns {Object} The middleware object.
+**/
 const verifyTokenMiddleware = (options) => {
   return {
     before: (handler, next) => {
@@ -23,8 +20,6 @@ const verifyTokenMiddleware = (options) => {
         return next(new Error("Authorization token missing"));
       }
       try {
-        console.log("token", token)
-        console.log("options.secret", options.secret)
         const decoded = jwt.verify(token, options.secret);
         handler.event.user = decoded;
         next();
@@ -35,6 +30,13 @@ const verifyTokenMiddleware = (options) => {
   };
 };
 
+/**
+Uploads a file to an S3 bucket.
+@param {string} bucketName - The name of the S3 bucket.
+@param {string} file - The file to upload.
+@param {string} fileName - The name of the file in the S3 bucket.
+@returns {Object} An object containing the status code and URL of the uploaded file.
+*/
 async function upload_to_aws(bucketName, file, fileName) {
   try {
     const params = {
@@ -55,19 +57,16 @@ async function upload_to_aws(bucketName, file, fileName) {
     };
   } catch (error) {
     if (error.code === "NoSuchBucket") {
-      console.log("Bucket does not exist");
       return {
         statusCode: 404,
         body: "Bucket does not exist",
       };
     } else if (error.code === "NoSuchKey") {
-      console.log("The file was not found.");
       return {
         statusCode: 404,
         body: "The file was not found",
       };
     } else {
-      console.log("An error occurred:", error);
       return {
         statusCode: 500,
         body: "Internal Server Error",
@@ -76,7 +75,16 @@ async function upload_to_aws(bucketName, file, fileName) {
   }
 }
 
+/**
+The main handler function.
+@param {Object} event - The event object.
+@param {Object} event.user - The user object from the JWT token.
+@param {string} event.body - The request body as a JSON string.
+@returns {Object} An object containing the status
+**/
 const myHandler = async (event) => {
+  // user object
+  const user = event.user;
   const body = event.body;
   const bodyObj = JSON.parse(body);
   const file = JSON.stringify(bodyObj.event);
@@ -84,6 +92,7 @@ const myHandler = async (event) => {
   return res;
 };
 
+// export handler with middleware
 export const handler = middy(myHandler).use(
   verifyTokenMiddleware({ secret: jwtSecret })
 );

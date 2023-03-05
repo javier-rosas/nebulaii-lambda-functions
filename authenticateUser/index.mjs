@@ -1,8 +1,7 @@
 import jwt from "jsonwebtoken";
 
 export const handler = async (event) => {
-  const data = JSON.parse(event.body);
-  const user = data.event.body.user;
+  const user = JSON.parse(event.body);
   try {
     const token = jwt.sign(user, process.env.JWT_SECRET, {
       expiresIn: "1h",
