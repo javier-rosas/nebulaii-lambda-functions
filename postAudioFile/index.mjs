@@ -26,7 +26,7 @@ const verifyTokenMiddleware = (options) => {
         console.log("token", token)
         console.log("options.secret", options.secret)
         const decoded = jwt.verify(token, options.secret);
-        // handler.event.user = decoded;
+        handler.event.user = decoded;
         next();
       } catch (err) {
         next(new Error("Invalid token"));
