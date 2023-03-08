@@ -1,8 +1,8 @@
-import AWS from "aws-sdk";
+import { Storage } from "@google-cloud/storage";
 import jwt from "jsonwebtoken";
 import middy from "middy";
 
-const s3 = new AWS.S3();
+const storage = new Storage();
 const bucketName = process.env.BUCKET_NAME;
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -24,6 +24,7 @@ const verifyTokenMiddleware = (options) => {
         handler.event.user = decoded;
         next();
       } catch (err) {
+        console.log(err);
         next(new Error("Invalid token"));
       }
     },
@@ -31,47 +32,35 @@ const verifyTokenMiddleware = (options) => {
 };
 
 /**
-Uploads a file to an S3 bucket.
-@param {string} bucketName - The name of the S3 bucket.
-@param {string} file - The file to upload.
-@param {string} fileName - The name of the file in the S3 bucket.
-@returns {Object} An object containing the status code and URL of the uploaded file.
-*/
-async function upload_to_aws(bucketName, file, fileName) {
+ * Uploads an audio file to a Google Cloud Storage bucket.
+ * @param {string} bucketName - The name of the bucket to upload the file to.
+ * @param {string} audioFile - The local path of the audio file to upload.
+ * @param {string} destinationFilename - The name of the file to create in the bucket.
+ * @returns {Promise<{ statusCode: number, body: string }>} A Promise that resolves to a JSON object containing a status code and message.
+ */
+async function uploadAudioFileToBucket(
+  bucketName,
+  audioFile,
+  destinationFilename
+) {
   try {
-    const params = {
-      Bucket: bucketName,
-      Key: fileName,
-      Body: file,
-    };
-    await s3.putObject(params).promise();
-    const url = await s3.getSignedUrlPromise("getObject", {
-      Bucket: bucketName,
-      Key: fileName,
-      Expires: 24 * 3600,
-    });
-
+    const file = storage.bucket(bucketName).file(destinationFilename);
+    await file.save(audioFile);
+    console.log(
+      `Audio file ${audioFile} uploaded to bucket ${bucketName} as ${destinationFilename}.`
+    );
     return {
       statusCode: 200,
-      body: url,
+      body: JSON.stringify({ message: "Audio file uploaded successfully." }),
     };
-  } catch (error) {
-    if (error.code === "NoSuchBucket") {
-      return {
-        statusCode: 404,
-        body: "Bucket does not exist",
-      };
-    } else if (error.code === "NoSuchKey") {
-      return {
-        statusCode: 404,
-        body: "The file was not found",
-      };
-    } else {
-      return {
-        statusCode: 500,
-        body: "Internal Server Error",
-      };
-    }
+  } catch (err) {
+    console.error(`Error uploading audio file to bucket: ${err}`);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        message: "Error uploading audio file to bucket.",
+      }),
+    };
   }
 }
 
@@ -83,12 +72,16 @@ The main handler function.
 @returns {Object} An object containing the status
 **/
 const myHandler = async (event) => {
-  // user object
   const user = event.user;
   const body = event.body;
   const bodyObj = JSON.parse(body);
-  const file = JSON.stringify(bodyObj.event);
-  const res = await upload_to_aws(bucketName, file, "test_file_5.json");
+  const fileEncoded = JSON.stringify(bodyObj.event);
+  const fileDecoded = Buffer.from(fileEncoded, "base64");
+  const res = await uploadAudioFileToBucket(
+    bucketName,
+    fileDecoded,
+    "test.mp3"
+  );
   return res;
 };
 

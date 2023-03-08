@@ -1,5 +1,5 @@
 {
-  "name": "postaudiofile",
+  "name": "transcribeaudiofile",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/storage": "^6.9.4",
+    "@google-cloud/speech": "^5.4.0",
     "jsonwebtoken": "^9.0.0",
     "middy": "^0.36.0"
   }
