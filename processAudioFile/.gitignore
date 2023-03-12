@@ -1,6 +1,6 @@
-.env
-package-lock.json
 node_modules
-transcribeAudioFile.zip
+.env
 .DS_Store
+package-lock.json
+postAudioFile.zip
 nebulaii-405523c10a97.json

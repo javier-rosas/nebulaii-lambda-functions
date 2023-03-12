@@ -1,15 +1,16 @@
-import speech from "@google-cloud/speech";
+import { v1p1beta1 as speech } from "@google-cloud/speech";
 import jwt from "jsonwebtoken";
 import middy from "middy";
 
 const bucketName = process.env.BUCKET_NAME;
 const client = new speech.SpeechClient();
+const jwtSecret = process.env.JWT_SECRET;
 
 /**
-Verifies the JWT token provided in the HTTP headers of the incoming request.
-@param {Object} options - The options for the middleware.
-@param {string} options.secret - The JWT secret key.
-@returns {Object} The middleware object.
+* Verifies the JWT token provided in the HTTP headers of the incoming request.
+* @param {Object} options - The options for the middleware.
+* @param {string} options.secret - The JWT secret key.
+* @returns {Object} The middleware object.
 **/
 const verifyTokenMiddleware = (options) => {
   return {
@@ -29,48 +30,93 @@ const verifyTokenMiddleware = (options) => {
   };
 };
 
+
+/**
+* Converts array of word objects to array of sentence objects
+* @param {Array} words array of word objects with speaker tags 
+* @returns {Array} array of sentence objects in the form of:
+ [
+  { speakerTag: 1, "Hello, there!"},
+  { speakerTag: 2, "Hey dude!"}
+ ]
+*/
+function convert(words) {
+  let sentences = [];
+  let sentence = "";
+  let currentSpeaker = words[0].speakerTag;
+
+  words.forEach((word, index) => {
+    if (word.speakerTag !== currentSpeaker || index === words.length - 1) {
+      sentences.push({ speakerTag: currentSpeaker, sentence });
+      sentence = "";
+      currentSpeaker = word.speakerTag;
+    }
+    sentence += `${word.word} `;
+  });
+
+  let lastSentence = sentences[sentences.length - 1];
+  if (lastSentence.sentence !== sentence && lastSentence.speakerTag !== currentSpeaker) {
+    sentences.push({ speakerTag: currentSpeaker, sentence });
+  } else if (lastSentence.sentence !== sentence && lastSentence.speakerTag === currentSpeaker) {
+    lastSentence.sentence += sentence
+  }
+
+  return sentences;
+}
+
+
+/**
+* Transcribes an audio file located in a Google Cloud Storage bucket
+* using the Google Cloud Speech-to-Text API with speaker diarization.
+* @async
+* @function
+* @param {string} bucketPath - The path to the audio file in the Google Cloud Storage bucket.
+* @param {string} languageCode - The language code of the audio file.
+* @returns {Array} - An array of sentences with speaker tags.
+* @throws Will throw an error if the transcription fails.
+*/
 const transcribeAudioFile = async (bucketPath, languageCode) => {
-  // The path to the remote LINEAR16 file
+  
   const gcsUri = bucketPath;
 
-  // The audio file's encoding, sample rate in hertz, and BCP-47 language code
   const audio = {
     uri: gcsUri,
   };
+
   const config = {
     encoding: "LINEAR16",
-    sampleRateHertz: 16000,
+    sampleRateHertz: 48000,
     languageCode: languageCode,
     enableSpeakerDiarization: true,
+    enableAutomaticPunctuation: true,
     minSpeakerCount: 2,
-    maxSpeakerCount: 15,
-    model: "phone_call",
+    maxSpeakerCount: 2,
+    model: "latest_long",
   };
+
   const request = {
     audio: audio,
     config: config,
   };
 
-  // Detects speech in the audio file. This creates a recognition job that you
-  // can wait for now, or get its result later.
-  const [operation] = await client.longRunningRecognize(request);
-  // Get a Promise representation of the final result of the job
+  const [operation] = client.longRunningRecognize(request);
   const [response] = await operation.promise();
   const transcription = response.results
     .map((result) => result.alternatives[0].transcript)
     .join("\n");
+
   console.log(`Transcription: ${transcription}`);
   console.log("Speaker Diarization:");
+
   const result = response.results[response.results.length - 1];
   const wordsInfo = result.alternatives[0].words;
-  // Note: The transcript within each result is separate and sequential per result.
-  // However, the words list within an alternative includes all the words
-  // from all the results thus far. Thus, to get all the words with speaker
-  // tags, you only have to take the words list from the last result:
-  wordsInfo.forEach((a) =>
-    console.log(` word: ${a.word}, speakerTag: ${a.speakerTag}`)
-  );
+  const sentences = convert(wordsInfo)
+  
+  console.log(sentences);
+
+  return sentences
 };
+
 
 /**
 The main handler function.
@@ -88,10 +134,16 @@ const myHandler = async (event) => {
   // const jsonBlob = new Blob([fileDecoded], { type: 'application/json' });
   // const file0 = new File([jsonBlob], 'test_file_5.json', { type: 'application/json' });
   const res = await transcribeAudioFile(
-    "gs://nebulaii-audio-files/test.m4a",
+    "gs://nebulaii-audio-files/test.wav",
     "en-US"
   );
-  return res;
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: "Successful transcription.", 
+      res
+    })
+  }
 };
 
 // export handler with middleware
