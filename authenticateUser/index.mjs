@@ -4,7 +4,7 @@ export const handler = async (event) => {
   const user = JSON.parse(event.body);
   try {
     const token = jwt.sign(user, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "365d",
     });
     return {
       statusCode: 200,

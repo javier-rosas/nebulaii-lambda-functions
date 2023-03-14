@@ -14,7 +14,8 @@ The main handler function.
 * @param {string} event.body - The request body as a JSON string.
 * @returns {Object} An object containing the status
 **/
-const myHandler = async (event) => {
+const myHandler = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false;
   const user = event.user;
   const body = event.body;
   const bodyObj = JSON.parse(body);

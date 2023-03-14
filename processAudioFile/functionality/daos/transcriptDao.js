@@ -1,4 +1,4 @@
-import { transcriptModel } from '../mongoose/transcriptModel'
+import { TranscriptModel } from '../mongoose/TranscriptModel'
 
 export default class TranscriptDao {
 
@@ -14,7 +14,7 @@ export default class TranscriptDao {
   constructor() { }
 
   createTranscript = async (userId, fileName, description, dateAdded, transcript) => {
-    transcriptModel.create({ userId, fileName, description, dateAdded, transcript })
+    TranscriptModel.create({ userId, fileName, description, dateAdded, transcript })
   }  
 
 }
