@@ -1,0 +1,8 @@
+.env
+.DS_Store
+/node_modules
+package-lock.json
+postAudioFile.zip
+processAudioFile.zip
+authenticateUser.zip
+mongoUserModelAndDao.zip
