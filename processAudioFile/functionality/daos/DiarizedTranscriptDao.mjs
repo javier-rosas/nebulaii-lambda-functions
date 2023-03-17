@@ -16,8 +16,14 @@ export default class DiarizedTranscriptDao {
 
   constructor() { }
 
-  createDiarizedTranscript = async (transcriptObj) => {
-    DiarizedTranscriptModel.create(transcriptObj)
+  createOrUpdateDiarizedTranscript = async (transcriptObj) => {
+    const filter = { 
+      userEmail: transcriptObj.userEmail,
+      filename: transcriptObj.filename
+     };
+    const options = { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true };
+    const diarizedTranscriptDaoMongooseModel = await DiarizedTranscriptModel.findOneAndUpdate(filter, transcriptObj, options);
+    return diarizedTranscriptDaoMongooseModel;
   }  
 
 }

@@ -17,7 +17,7 @@ export default class DiarizedTranscriptMappingDao {
 
   constructor() { }
 
-  createTranscript = async (mappingObj) => {
+  createTranscriptMapping = async (mappingObj) => {
     DiarizedTranscriptMappingModel.create(mappingObj)
   }  
 

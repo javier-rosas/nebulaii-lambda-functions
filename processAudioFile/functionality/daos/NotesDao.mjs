@@ -1,6 +1,5 @@
 import NotesModel from '../mongoose/models/NotesModel.mjs'
 
-
 /**
  * Notes Dao
  */
@@ -17,8 +16,28 @@ export default class NotesDao {
 
   constructor() { }
 
-  createTranscript = async (notesObj) => {
-    NotesModel.create(notesObj)
+  createOrUpdateNotes = async (notesObj) => {
+    try {
+      const filter = {
+        userEmail: notesObj.userEmail,
+        filename: notesObj.filename,
+      };
+      const options = {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+        runValidators: true,
+      };
+      const notesMongooseModel = await NotesModel.findOneAndUpdate(
+        filter,
+        notesObj,
+        options
+      );
+      return notesMongooseModel;
+    } catch (err) {
+      console.log(err);
+      throw new Error("Error creating or updating transcript");
+    }
   }  
 
 }

@@ -46,6 +46,9 @@ const mainHandler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
   try {
     const userJwtDecoded = event.user;
+    const fullPath = event.resource;
+    console.log(fullPath)
+
     const user = JSON.parse(event.body);
     const newUser = await createUserOrUpdate(userJwtDecoded, user);
     return createResponse(200, newUser);
