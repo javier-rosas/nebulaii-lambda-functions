@@ -1,39 +1,14 @@
 import middy from "middy";
 import { verifyTokenMiddleware } from "./auth/verifyTokenMiddleware.mjs";
+import { createOrUpdateUserHandler } from "./helpers.mjs"
+import { getUserAudioFileDataHandler } from "./helpers.mjs"
 import { mongooseConnect } from "./mongoose/mongooseConnect.mjs";
+import { createResponse } from "./helpers.mjs";
 import UserDao from "./daos/UserDao.mjs";
 
+
+
 const jwtSecret = process.env.JWT_SECRET;
-
-/**
- * Creates a new user or updates an existing one in the database.
- * @async
- * @param {object} userJwtDecoded - Decoded JWT token for the user.
- * @param {object} user - User data to create or update.
- * @returns {Promise<object>} - The created or updated user object.
- * @throws {Error} - If the email in the JWT token and the email in the user data don't match.
- */
-const createUserOrUpdate = async (userJwtDecoded, user) => {
-  if (userJwtDecoded.email !== user.email) {
-    throw new Error("Decoded user email and user email in body don't match");
-  }
-
-  await mongooseConnect();
-  const userDao = new UserDao();
-  const newUser = await userDao.createOrUpdateUser(user);
-  return newUser;
-};
-
-/**
- * Creates a response object with a given status code and body.
- * @param {number} statusCode - The HTTP status code to return.
- * @param {object} body - The response body.
- * @returns {object} - The response object.
- */
-const createResponse = (statusCode, body) => ({
-  statusCode,
-  body: JSON.stringify(body),
-});
 
 /**
  * The main Lambda function handler.
@@ -44,15 +19,14 @@ const createResponse = (statusCode, body) => ({
  */
 const mainHandler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
-  try {
-    const userJwtDecoded = event.user;
-    const user = JSON.parse(event.body);
-    const newUser = await createUserOrUpdate(userJwtDecoded, user);
-    return createResponse(200, newUser);
-  } catch (error) {
-    console.log("error", error);
-    const errorMessage = error.message || "Internal server error";
-    return createResponse(500, { error: errorMessage });
+  await mongooseConnect();
+  const userDao = new UserDao();
+  if (event.routeKey === "POST /mongoUserHandler/user") {
+    return await createOrUpdateUserHandler(event, userDao)
+  } else if (event.routeKey === "GET /mongoUserHandler/user/{userEmail}") {
+    return await getUserAudioFileDataHandler(event, userDao)
+  } else {
+    return createResponse(404, { error: "Not Found" });
   }
 };
 
