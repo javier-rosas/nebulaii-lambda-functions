@@ -34,7 +34,6 @@ export default class TranscriptDao {
       );
       return transcriptDaoMongooseModel;
     } catch (err) {
-      console.log(err);
       throw new Error("Error creating or updating transcript");
     }
   };

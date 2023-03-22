@@ -18,7 +18,6 @@ export function verifyTokenMiddleware(options) {
         handler.event.user = decoded;
         next();
       } catch (err) {
-        console.log(err);
         next(new Error("Invalid token"));
       }
     },

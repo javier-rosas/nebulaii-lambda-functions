@@ -1,4 +1,4 @@
-import { createResponse } from "../utils/responseUtils.mjs";
+import { createResponse } from "../utils/createResponse.mjs";
 
 /**
  * Creates or updates a user.

@@ -15,8 +15,7 @@ export async function transcribeAudioFile(
   bucketPath, 
   languageCode,
   enableSpeakerDiarization,
-  minSpeakerCount,
-  maxSpeakerCount
+  speakerCount
   ) {
   const gcsUri = bucketPath;
 
@@ -30,8 +29,8 @@ export async function transcribeAudioFile(
     languageCode,
     enableSpeakerDiarization,
     enableAutomaticPunctuation: true,
-    minSpeakerCount,
-    maxSpeakerCount,
+    minSpeakerCount: speakerCount,
+    maxSpeakerCount: speakerCount,
     model: "latest_long",
   };
 
@@ -46,10 +45,15 @@ export async function transcribeAudioFile(
     .map((result) => result.alternatives[0].transcript)
     .join("\n");
 
+  console.log("here 3")
+
   if (enableSpeakerDiarization) {
     const result = response.results[response.results.length - 1];
     const wordsInfo = result.alternatives[0].words;
     transcription = convertWordArrToSentenceArr(wordsInfo);
   }
+
+  console.log("here 4")
+
   return transcription
 }

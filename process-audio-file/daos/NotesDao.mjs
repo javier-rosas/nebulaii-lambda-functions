@@ -35,7 +35,6 @@ export default class NotesDao {
       );
       return notesMongooseModel;
     } catch (err) {
-      console.log(err);
       throw new Error("Error creating or updating transcript");
     }
   }  
