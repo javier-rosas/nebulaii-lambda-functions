@@ -46,7 +46,7 @@ export default class FileDao {
 
   getFileByUserEmailAndFilename = async (userEmail, filename) => {
     try {
-      const file = await FileModel.find({ userEmail, filename });
+      const file = await FileModel.findOne({ userEmail, filename });
       return file;
     } catch (err) {
       throw new Error("Error getting file by user email and filename");

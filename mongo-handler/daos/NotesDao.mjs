@@ -46,7 +46,7 @@ export default class NotesDao {
 
   getNoteByUserEmailAndFilename = async (userEmail, filename) => {
     try {
-      const note = await NotesModel.find({
+      const note = await NotesModel.findOne({
         userEmail,
         filename,
       });

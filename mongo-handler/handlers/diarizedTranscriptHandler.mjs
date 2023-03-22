@@ -14,7 +14,9 @@ export const getDiarizedTranscriptsByUserEmail = async (event, diarizedTranscrip
 export const getDiarizedTranscriptByUserEmailAndFilename = async (event, diarizedTranscriptDao) => {
   try {
     const userEmail = event.pathParameters.userEmail;
-    const diarizedTranscript = await diarizedTranscriptDao.getDiarizedTranscriptByUserEmailAndFilename(userEmail);
+    const filename = event.pathParameters.filename;
+    const diarizedTranscript = await diarizedTranscriptDao.getDiarizedTranscriptByUserEmailAndFilename(userEmail, filename);
+    console.log("diarizedTranscript in diarizedTranscriptHandler: ", diarizedTranscript)
     return createResponse(200, diarizedTranscript);
   } catch (error) {
     const errorMessage = error.message || "Internal server error";

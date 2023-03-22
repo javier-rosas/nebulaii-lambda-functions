@@ -15,7 +15,8 @@ export const getTranscriptsByUserEmail = async (event, transcriptDao) => {
 export const getTranscriptByUserEmailAndFilename = async (event, transcriptDao) => {
   try {
     const userEmail = event.pathParameters.userEmail;
-    const transcript = await transcriptDao.getTranscriptByUserEmailAndFilename(userEmail);
+    const filename = event.pathParameters.filename;
+    const transcript = await transcriptDao.getTranscriptByUserEmailAndFilename(userEmail, filename);
     return createResponse(200, transcript);
   } catch (error) {
     const errorMessage = error.message || "Internal server error";

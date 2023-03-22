@@ -23,26 +23,32 @@ const jwtSecret = process.env.JWT_SECRET;
  */
 const mainHandler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
-  await mongooseConnect();
-  const userDao = new UserDao();
-  const fileDao = new FileDao();
-  const transcriptDao = new TranscriptDao();
-  const notesDao = new NotesDao();
-  const diarizedTranscriptDao = new DiarizedTranscriptDao();
-  switch (event.routeKey) {
-    case "POST /api/v1/user":
-      return await createOrUpdateUser(event, userDao);
-    case "GET /api/v1/user/{userEmail}/files":
-      return await getFilesByUserEmail(event, fileDao);
-    case "GET /api/v1/user/{userEmail}/transcript/{filename}":
-      return await getTranscriptByUserEmailAndFilename(event, transcriptDao);
-    case "GET /api/v1/user/{userEmail}/diarized-transcript/{filename}":
-      return await getDiarizedTranscriptByUserEmailAndFilename(event, diarizedTranscriptDao);
-    case "GET /api/v1/user/{userEmail}/note/{filename}":
-      return await getNoteByUserEmailAndFilename(event, notesDao);
-    default:
-      return createResponse(404, { error: "Not Found" });
+  try {
+    await mongooseConnect();
+    const userDao = new UserDao();
+    const fileDao = new FileDao();
+    const transcriptDao = new TranscriptDao();
+    const notesDao = new NotesDao();
+    const diarizedTranscriptDao = new DiarizedTranscriptDao();
+    switch (event.routeKey) {
+      case "POST /api/v1/user":
+        return await createOrUpdateUser(event, userDao);
+      case "GET /api/v1/user/{userEmail}/files":
+        return await getFilesByUserEmail(event, fileDao);
+      case "GET /api/v1/user/{userEmail}/transcript/{filename}":
+        return await getTranscriptByUserEmailAndFilename(event, transcriptDao);
+      case "GET /api/v1/user/{userEmail}/diarized-transcript/{filename}":
+        return await getDiarizedTranscriptByUserEmailAndFilename(event, diarizedTranscriptDao);
+      case "GET /api/v1/user/{userEmail}/note/{filename}":
+        return await getNoteByUserEmailAndFilename(event, notesDao);
+      default:
+        return createResponse(404, { error: "Not Found" });
+    }
+  } catch (e) {
+    console.error(e);
+    return createResponse(500, { error: "Internal Server Error" });
   }
+
 };
 
 /**

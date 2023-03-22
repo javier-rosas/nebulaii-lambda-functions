@@ -14,7 +14,7 @@ const bucketName = process.env.BUCKET_NAME;
  * @param {string} userEmail - The email address of the user.
  * @returns {Promise<Object>} - A Promise that resolves with the transcript object.
  */
-export const createTranscriptHandler = async (
+export const createTranscript = async (
   filename,
   language,
   enableSpeakerDiarization,

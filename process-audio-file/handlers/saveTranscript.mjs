@@ -11,7 +11,7 @@ import TranscriptDao from "../daos/TranscriptDao.mjs";
  * @param {boolean} enableSpeakerDiarization - Whether to enable speaker diarization.
  * @returns {Promise<Object>} - A Promise that resolves with the MongoDB model of the saved transcript.
  */
-export const saveTranscriptHandler = async (transcriptObj, enableSpeakerDiarization) => {
+export const saveTranscript = async (transcriptObj, enableSpeakerDiarization) => {
   console.log("here 5")
 
   if (enableSpeakerDiarization) {

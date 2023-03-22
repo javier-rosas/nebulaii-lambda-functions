@@ -7,7 +7,7 @@ import FileDao from "../daos/FileDao.mjs";
  * @param {number} speakerCount 
  * @returns mongoose file object model
  */
-export const saveFileHandler = async (
+export const saveFile = async (
   fileObj,
   enableSpeakerDiarization,
   speakerCount

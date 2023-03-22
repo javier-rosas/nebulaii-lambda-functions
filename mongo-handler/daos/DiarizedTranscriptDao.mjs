@@ -49,10 +49,11 @@ export default class DiarizedTranscriptDao {
 
   getDiarizedTranscriptByUserEmailAndFilename = async (userEmail, filename) => {
     try {
-      const diarizedTranscriptModel = await DiarizedTranscriptModel.find({
+      const diarizedTranscriptModel = await DiarizedTranscriptModel.findOne({
         userEmail,
         filename,
       });
+      console.log("diarizedTranscriptModel in DiarizedTranscriptDao: ", diarizedTranscriptModel)
       return diarizedTranscriptModel;
     } catch (err) {
       throw new Error(

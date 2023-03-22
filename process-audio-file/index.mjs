@@ -3,11 +3,11 @@ import { verifyTokenMiddleware } from "./auth/verifyTokenMiddleware.mjs";
 import { mongooseConnect } from "./mongoose/mongooseConnect.mjs";
 import { createSuccessResponse } from "./utils/createSuccessResponse.mjs";
 import { createErrorResponse } from "./utils/createErrorResponse.mjs";
-import { createTranscriptHandler } from "./handlers/createTranscriptHandler.mjs";
-import { createNotesHandler } from "./handlers/createNotesHandler.mjs";
-import { saveNotesHandler } from "./handlers/saveNotesHandler.mjs";
-import { saveTranscriptHandler } from "./handlers/saveTranscriptHandler.mjs";
-import { saveFileHandler } from "./handlers/saveFileHandler.mjs";
+import { createTranscriptHandler } from "./handlers/createTranscript.mjs";
+import { createNotes } from "./handlers/createNotes.mjs";
+import { saveNotes } from "./handlers/saveNotes.mjs";
+import { saveTranscript } from "./handlers/saveTranscript.mjs";
+import { saveFile } from "./handlers/saveFile.mjs";
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -56,10 +56,10 @@ const myHandler = async (event, context) => {
     };
 
     // save transcript to database
-    await saveTranscriptHandler(transcriptObj, enableSpeakerDiarization);
+    await saveTranscript(transcriptObj, enableSpeakerDiarization);
 
     // create notes using gpt-3.5 api
-    const notes = await createNotesHandler(transcript);
+    const notes = await createNotes(transcript);
 
     // create notes object to store in database
     const notesObj = {
@@ -69,7 +69,7 @@ const myHandler = async (event, context) => {
     };
 
     // save notes to database
-    await saveNotesHandler(notesObj);
+    await saveNotes(notesObj);
 
     // create file object to store in database
     const fileObj = {
@@ -80,7 +80,7 @@ const myHandler = async (event, context) => {
     };
 
     // save file to database
-    await saveFileHandler(fileObj, enableSpeakerDiarization, speakerCount);
+    await saveFile(fileObj, enableSpeakerDiarization, speakerCount);
 
     return createSuccessResponse(transcript, notes);
   } catch (error) {

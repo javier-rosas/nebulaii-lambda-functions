@@ -46,7 +46,7 @@ export default class TranscriptDao {
 
   getTranscriptByUserEmailAndFilename = async (userEmail, filename) => {
     try {
-      const transcript = await TranscriptModel.find({
+      const transcript = await TranscriptModel.findOne({
         userEmail,
         filename,
       });
