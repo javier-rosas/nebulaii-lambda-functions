@@ -11,15 +11,14 @@ export function verifyTokenMiddleware(options) {
     before: (handler, next) => {
       const token = handler.event.headers.authorization;
       if (!token) {
-        return next(new Error("Authorization token missing"));
+        return next(new Error("Authorization token missing."));
       }
       try {
         const decoded = jwt.verify(token, options.secret);
         handler.event.user = decoded;
         next();
       } catch (err) {
-        console.log(err);
-        next(new Error("Invalid token"));
+        next(new Error("Invalid token."));
       }
     },
   };

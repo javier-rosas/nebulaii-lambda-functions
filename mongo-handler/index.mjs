@@ -1,11 +1,10 @@
 import middy from "middy";
 import { verifyTokenMiddleware } from "./auth/verifyTokenMiddleware.mjs";
-import { createOrUpdateUserHandler } from "./helpers.mjs"
-import { getUserAudioFileDataHandler } from "./helpers.mjs"
+import { createOrUpdateUserHandler } from "./handlers/userHandler.mjs";
+import { getFilesByUserEmailHandler } from "./handlers/fileHandler.mjs";
 import { mongooseConnect } from "./mongoose/mongooseConnect.mjs";
 import { createResponse } from "./helpers.mjs";
 import UserDao from "./daos/UserDao.mjs";
-
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -19,17 +18,15 @@ const mainHandler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
   await mongooseConnect();
   const userDao = new UserDao();
-  
-  switch(event.routeKey) {
+  switch (event.routeKey) {
     case "POST /api/v1/user":
       return await createOrUpdateUserHandler(event, userDao);
-    case "GET /api/v1/user/{userEmail}/file/{filename}":
-      return await getUserAudioFileDataHandler(event, userDao);
+    case "GET /api/v1/user/{userEmail}/files":
+      return await getFilesByUserEmailHandler(event, userDao);
     default:
       return createResponse(404, { error: "Not Found" });
   }
 };
-
 
 /**
  * A middleware-wrapped AWS Lambda handler function that uses a JWT token for authentication.

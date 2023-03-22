@@ -6,7 +6,7 @@ import { createResponse } from "../utils/createResponse.mjs";
  * @param {*} fileDao 
  * @returns {Promise<Object>} Returns a Promise that resolves with a response object containing the list of files or an error message.
  */
-export const getFilesByUserEmail = async (event, fileDao) => {
+export const getFilesByUserEmailHandler = async (event, fileDao) => {
   try {
     const userEmail = event.pathParameters.userEmail;
     const files = await fileDao.getFilesByUserEmail(userEmail);
