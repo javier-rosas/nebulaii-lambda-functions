@@ -7,12 +7,10 @@ import { createResponse } from "./helpers.mjs";
 import UserDao from "./daos/UserDao.mjs";
 
 
-
 const jwtSecret = process.env.JWT_SECRET;
 
 /**
  * The main Lambda function handler.
- * @async
  * @param {object} event - The Lambda event object.
  * @param {object} context - The Lambda context object.
  * @returns {Promise<object>} - The response object.
@@ -21,20 +19,20 @@ const mainHandler = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false;
   await mongooseConnect();
   const userDao = new UserDao();
-  if (event.routeKey === "POST /mongoUserHandler/user") {
-    return await createOrUpdateUserHandler(event, userDao)
-  } else if (event.routeKey === "GET /mongoUserHandler/user/{userEmail}") {
-    return await getUserAudioFileDataHandler(event, userDao)
-  } else {
-    return createResponse(404, { error: "Not Found" });
+  
+  switch(event.routeKey) {
+    case "POST /api/v1/user":
+      return await createOrUpdateUserHandler(event, userDao);
+    case "GET /api/v1/user/{userEmail}/file/{filename}":
+      return await getUserAudioFileDataHandler(event, userDao);
+    default:
+      return createResponse(404, { error: "Not Found" });
   }
 };
 
+
 /**
  * A middleware-wrapped AWS Lambda handler function that uses a JWT token for authentication.
- *
- * @constant
- * @type {function}
  * @param {function} myHandler - The AWS Lambda handler function to be wrapped with middleware.
  * @returns {function} - A middleware-wrapped AWS Lambda handler function that uses a JWT token for authentication.
  */

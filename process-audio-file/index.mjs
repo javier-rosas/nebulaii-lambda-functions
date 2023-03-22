@@ -73,6 +73,7 @@ const createTranscript = async (audioFileObj, user) => {
  * @returns {Promise<Object>} - A Promise that resolves with the MongoDB model of the saved transcript.
  */
 const saveTranscript = async (transcriptObj, enableSpeakerDiarization) => {
+
   if (enableSpeakerDiarization) {
     const diarizedTranscriptDao = new DiarizedTranscriptDao();
     return await diarizedTranscriptDao.createOrUpdateDiarizedTranscript(
@@ -102,6 +103,11 @@ const extractAudioFileObject = (event) => {
  * @returns {Promise<object>} The notes object created in the database.
  */
 const createAndSaveNotes = async (transcriptObj, userEmail) => {
+  const transcriptDescription =
+  audioFileObj.enableSpeakerDiarization === true
+    ? `Number of speakers: ${audioFileObj.minSpeakerCount}`
+    : "Number of speakers: 1";
+  transcriptObj.description = transcriptDescription;
   const notes = await createNotes(transcriptObj);
   const notesDao = new NotesDao();
   const notesObj = {
