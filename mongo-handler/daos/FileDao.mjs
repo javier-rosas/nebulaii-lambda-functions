@@ -40,7 +40,7 @@ export default class FileDao {
       const file = await FileModel.find({ userEmail });
       return file;
     } catch (err) {
-      throw new Error("Error getting file by user email");
+      throw new Error("Error getting files by user email");
     }
   };
 

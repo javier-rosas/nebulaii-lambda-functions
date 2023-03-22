@@ -12,12 +12,47 @@ export default class TranscriptDao {
 
   constructor() {}
 
-  getTranscript = async (userEmail, filename) => {
+  createOrUpdateTranscript = async (transcriptObj) => {
     try {
-      const transcript = await TranscriptModel.find({ userEmail, filename });
+      const filter = {
+        userEmail: transcriptObj.userEmail,
+        filename: transcriptObj.filename,
+      };
+      const options = {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+        runValidators: true,
+      };
+      const transcriptDaoMongooseModel = await TranscriptModel.findOneAndUpdate(
+        filter,
+        transcriptObj,
+        options
+      );
+      return transcriptDaoMongooseModel;
+    } catch (err) {
+      throw new Error("Error creating or updating transcript");
+    }
+  };
+
+  getTranscriptsByUserEmail = async (userEmail) => {
+    try {
+      const transcripts = await TranscriptModel.find({userEmail});
+      return transcripts;
+    } catch (err) {
+      throw new Error("Error getting transcripts by user email");
+    }
+  };
+
+  getTranscriptByUserEmailAndFilename = async (userEmail, filename) => {
+    try {
+      const transcript = await TranscriptModel.find({
+        userEmail,
+        filename,
+      });
       return transcript;
     } catch (err) {
-      throw new Error("Error creating or updating user");
+      throw new Error("Error getting transcript by user email and filename");
     }
   };
 }

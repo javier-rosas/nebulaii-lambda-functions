@@ -8,7 +8,7 @@ import { createResponse } from "../utils/createResponse.mjs";
  * @param {string} event.body - The request body containing the user data as a JSON string.
  * @returns {Promise<Object>} Returns a Promise that resolves with a response object containing the new user data or an error message.
  */
-export const createOrUpdateUserHandler = async (event, userDao) => {
+export const createOrUpdateUser = async (event, userDao) => {
   try {
     const userJwtDecoded = event.user;
     const user = JSON.parse(event.body);
