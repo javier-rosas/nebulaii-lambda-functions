@@ -34,3 +34,15 @@ export const getFileByUserEmailAndFilename = async (event, fileDao) => {
     return createResponse(500, { error: errorMessage });
   }
 }
+
+export const deleteFileByUserEmailAndFilename = async (event, fileDao) => {
+  try {
+    const userEmail = event.pathParameters.userEmail;
+    const filename = event.pathParameters.filename;
+    const file = await fileDao.deleteFileByUserEmailAndFilename(userEmail, filename);
+    return createResponse(200, file);
+  } catch (error) {
+    const errorMessage = error.message || "Internal server error";
+    return createResponse(500, { error: errorMessage });
+  }
+}

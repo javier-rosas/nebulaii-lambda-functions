@@ -1,4 +1,8 @@
+import mongoose from "mongoose";
 import FileModel from "../mongoose/models/FileModel.mjs";
+import TranscriptModel from "../mongoose/models/TranscriptModel.mjs";
+import NotesModel from "../mongoose/models/NotesModel.mjs";
+import DiarizedTranscriptModel from "../mongoose/models/DiarizedTranscriptModel.mjs";
 
 export default class FileDao {
   static fileDao = null;
@@ -52,5 +56,26 @@ export default class FileDao {
       throw new Error("Error getting file by user email and filename");
     }
   };
-}
 
+  deleteFileByUserEmailAndFilename = async (userEmail, filename) => {
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await FileModel.findOneAndDelete({ userEmail, filename }, { session });
+        await TranscriptModel.findOneAndDelete(
+          { userEmail, filename },
+          { session }
+        );
+        await NotesModel.findOneAndDelete({ userEmail, filename }, { session });
+        await DiarizedTranscriptModel.findOneAndDelete(
+          { userEmail, filename },
+          { session }
+        );
+      });
+    } catch (err) {
+      throw new Error("Error deleting file by user email and filename");
+    } finally {
+      session.endSession();
+    }
+  };
+}

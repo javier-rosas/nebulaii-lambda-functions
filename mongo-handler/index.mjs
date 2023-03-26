@@ -3,6 +3,7 @@ import { verifyTokenMiddleware } from "./auth/verifyTokenMiddleware.mjs";
 import { createOrUpdateUser } from "./handlers/userHandler.mjs";
 import { getTranscriptByUserEmailAndFilename } from "./handlers/transcriptHandler.mjs";
 import { getNoteByUserEmailAndFilename } from "./handlers/notesHandler.mjs";
+import { deleteFileByUserEmailAndFilename } from "./handlers/fileHandler.mjs";
 import { getDiarizedTranscriptByUserEmailAndFilename } from "./handlers/diarizedTranscriptHandler.mjs";
 import { getFilesByUserEmail } from "./handlers/fileHandler.mjs";
 import { mongooseConnect } from "./mongoose/mongooseConnect.mjs";
@@ -41,6 +42,8 @@ const mainHandler = async (event, context) => {
         return await getDiarizedTranscriptByUserEmailAndFilename(event, diarizedTranscriptDao);
       case "GET /api/v1/user/{userEmail}/note/{filename}":
         return await getNoteByUserEmailAndFilename(event, notesDao);
+      case "DELETE /api/v1/user/{userEmail}/file/{filename}":
+        return await deleteFileByUserEmailAndFilename(event, fileDao);
       default:
         return createResponse(404, { error: "Not Found" });
     }
