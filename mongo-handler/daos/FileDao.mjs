@@ -3,6 +3,7 @@ import FileModel from "../mongoose/models/FileModel.mjs";
 import TranscriptModel from "../mongoose/models/TranscriptModel.mjs";
 import NotesModel from "../mongoose/models/NotesModel.mjs";
 import DiarizedTranscriptModel from "../mongoose/models/DiarizedTranscriptModel.mjs";
+import { deleteFileFromGcpBucketByUserEmailAndFilename } from "../main/deleteFileFromGcpBucketByUserEmailAndFilename.mjs" 
 
 export default class FileDao {
   static fileDao = null;
@@ -58,24 +59,42 @@ export default class FileDao {
   };
 
   deleteFileByUserEmailAndFilename = async (userEmail, filename) => {
-    const session = await mongoose.startSession();
-    try {
-      await session.withTransaction(async () => {
-        await FileModel.findOneAndDelete({ userEmail, filename }, { session });
-        await TranscriptModel.findOneAndDelete(
-          { userEmail, filename },
-          { session }
-        );
-        await NotesModel.findOneAndDelete({ userEmail, filename }, { session });
-        await DiarizedTranscriptModel.findOneAndDelete(
-          { userEmail, filename },
-          { session }
-        );
-      });
-    } catch (err) {
-      throw new Error("Error deleting file by user email and filename");
-    } finally {
-      session.endSession();
+    const isFileDeleted = await deleteFileFromGcpBucketByUserEmailAndFilename(
+      userEmail,
+      filename
+    );
+    console.log("isFileDeleted", isFileDeleted)
+    if (isFileDeleted) {
+      const session = await mongoose.startSession();
+      try {
+        await session.withTransaction(async () => {
+          await FileModel.findOneAndDelete(
+            { userEmail, filename },
+            { session }
+          );
+          await TranscriptModel.findOneAndDelete(
+            { userEmail, filename },
+            { session }
+          );
+          await NotesModel.findOneAndDelete(
+            { userEmail, filename },
+            { session }
+          );
+          await DiarizedTranscriptModel.findOneAndDelete(
+            { userEmail, filename },
+            { session }
+          );
+        });
+      } catch (err) {
+        console.log("deleteFileByUserEmailAndFilename", err);
+        throw new Error("Error deleting file from MongoDB by user email and filename");
+      } finally {
+        session.endSession();
+      }
+    } else {
+      throw new Error(
+        "Error deleting file from GCP bucket by user email and filename"
+      );
     }
   };
 }
