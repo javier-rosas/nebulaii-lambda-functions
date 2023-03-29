@@ -1,11 +1,13 @@
 import middy from "middy";
 import { verifyTokenMiddleware } from "./auth/verifyTokenMiddleware.mjs";
 import { mongooseConnect } from "./mongoose/mongooseConnect.mjs";
-import { createSuccessResponse } from "./utils/createSuccessResponse.mjs";
-import { createErrorResponse } from "./utils/createErrorResponse.mjs";
+import { createResponse } from "./utils/createResponse.mjs";
 import { mainHandler } from "./handlers/mainHandler.mjs";
+import { processAudioFile } from "./handlers/processAudioFile.mjs";
+import { processYoutubeFile } from "./handlers/processYoutubeFile.mjs";
 
 const jwtSecret = process.env.JWT_SECRET;
+const ALLOWED_FILE_TYPES = ["audio/mp3", "audio/mp4", "audio/wav", "audio/m4a"];
 
 /**
  * Handle an AWS Lambda event.
@@ -25,25 +27,33 @@ const myHandler = async (event, context) => {
     const speakerCount = audioFileObj.minSpeakerCount;
     const dateAdded = audioFileObj.dateAdded;
     const description = audioFileObj.description;
+    const fileType = audioFileObj.fileType;
 
-    if (!userEmail || !filename || !dateAdded) {
+    if (!audioFileObj.userEmail || !audioFileObj.filename || !audioFileObj.dateAdded) {
       throw new Error("Data validation failed.");
     }
 
-    const { transcript, notes } = await mainHandler(
-      userEmail,
-      filename,
-      language,
-      enableSpeakerDiarization,
-      speakerCount,
-      description,
-      dateAdded
-    );
+    switch (event.routeKey) {
+      case "POST /api/v1/audio-files/process-audio-file":
+        return await processAudioFile(audioFileObj);
+      case "POST /api/v1/youtube/process-audio-file":
+        return await processYoutubeFile(audioFileObj);
+      default:
+        return createResponse(404, { error: "Not Found" });
+    }
 
-    return createSuccessResponse(transcript, notes);
+    // const { transcript, notes } = await mainHandler(
+    //   userEmail,
+    //   filename,
+    //   language,
+    //   enableSpeakerDiarization,
+    //   speakerCount,
+    //   description,
+    //   dateAdded
+    // );
   } catch (error) {
     console.log(error);
-    return createErrorResponse();
+    return createResponse(500, { error: error.message });
   }
 };
 
