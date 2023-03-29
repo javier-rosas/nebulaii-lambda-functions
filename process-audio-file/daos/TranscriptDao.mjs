@@ -1,8 +1,5 @@
 import TranscriptModel from "../mongoose/models/TranscriptModel.mjs";
 
-/**
- * Transcript Dao
- */
 export default class TranscriptDao {
   static transcriptDao = null;
 
@@ -35,6 +32,27 @@ export default class TranscriptDao {
       return transcriptDaoMongooseModel;
     } catch (err) {
       throw new Error("Error creating or updating transcript");
+    }
+  };
+
+  getTranscriptsByUserEmail = async (userEmail) => {
+    try {
+      const transcripts = await TranscriptModel.find({userEmail});
+      return transcripts;
+    } catch (err) {
+      throw new Error("Error getting transcripts by user email");
+    }
+  };
+
+  getTranscriptByUserEmailAndFilename = async (userEmail, filename) => {
+    try {
+      const transcript = await TranscriptModel.findOne({
+        userEmail,
+        filename,
+      });
+      return transcript;
+    } catch (err) {
+      throw new Error("Error getting transcript by user email and filename");
     }
   };
 }

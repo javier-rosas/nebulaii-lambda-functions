@@ -1,10 +1,6 @@
-import NotesModel from '../mongoose/models/NotesModel.mjs'
+import NotesModel from "../mongoose/models/NotesModel.mjs";
 
-/**
- * Notes Dao
- */
 export default class NotesDao {
-
   static notesDao = null;
 
   static getInstance = () => {
@@ -12,9 +8,9 @@ export default class NotesDao {
       NotesDao.notesDao = new NotesDao();
     }
     return NotesDao.notesDao;
-  }
+  };
 
-  constructor() { }
+  constructor() {}
 
   createOrUpdateNotes = async (notesObj) => {
     try {
@@ -35,8 +31,28 @@ export default class NotesDao {
       );
       return notesMongooseModel;
     } catch (err) {
-      throw new Error("Error creating or updating transcript");
+      throw new Error("Error creating or updating notes");
     }
-  }  
+  }
 
+  getNotesByUserEmail = async (userEmail) => {
+    try {
+      const notes = await NotesModel.find({userEmail});
+      return notes;
+    } catch (err) {
+      throw new Error("Error getting notes by user email");
+    }
+  };
+
+  getNoteByUserEmailAndFilename = async (userEmail, filename) => {
+    try {
+      const note = await NotesModel.findOne({
+        userEmail,
+        filename,
+      });
+      return note;
+    } catch (err) {
+      throw new Error("Error getting notes by user email and filename");
+    }
+  };
 }

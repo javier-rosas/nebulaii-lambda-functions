@@ -14,6 +14,7 @@ export default class FileDao {
 
   createOrUpdateFile = async (fileObj) => {
     try {
+      console.log(fileObj)
       const filter = {
         userEmail: fileObj.userEmail,
         filename: fileObj.filename,
@@ -31,6 +32,7 @@ export default class FileDao {
       );
       return fileMongooseModel;
     } catch (err) {
+      console.log(err)
       throw new Error("Error creating or updating file.");
     }
   };
@@ -40,16 +42,17 @@ export default class FileDao {
       const file = await FileModel.find({ userEmail });
       return file;
     } catch (err) {
-      throw new Error("Error getting file by user email");
+      throw new Error("Error getting files by user email");
     }
   };
 
   getFileByUserEmailAndFilename = async (userEmail, filename) => {
     try {
-      const file = await FileModel.find({ userEmail, filename });
+      const file = await FileModel.findOne({ userEmail, filename });
       return file;
     } catch (err) {
       throw new Error("Error getting file by user email and filename");
     }
   };
 }
+
