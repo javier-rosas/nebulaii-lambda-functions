@@ -3,7 +3,7 @@ import FileModel from "../mongoose/models/FileModel.mjs";
 import TranscriptModel from "../mongoose/models/TranscriptModel.mjs";
 import NotesModel from "../mongoose/models/NotesModel.mjs";
 import DiarizedTranscriptModel from "../mongoose/models/DiarizedTranscriptModel.mjs";
-import { deleteFileFromGcpBucketByUserEmailAndFilename } from "../main/deleteFileFromGcpBucketByUserEmailAndFilename.mjs" 
+import { deleteFileFromGcpBucketByUserEmailAndFilename } from "../main/gcpFunctions.mjs" 
 
 export default class FileDao {
   static fileDao = null;
