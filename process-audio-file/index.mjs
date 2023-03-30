@@ -2,12 +2,12 @@ import middy from "middy";
 import { verifyTokenMiddleware } from "./auth/verifyTokenMiddleware.mjs";
 import { mongooseConnect } from "./mongoose/mongooseConnect.mjs";
 import { createResponse } from "./utils/createResponse.mjs";
-import { mainHandler } from "./handlers/mainHandler.mjs";
 import { processAudioFile } from "./handlers/processAudioFile.mjs";
 import { processYoutubeFile } from "./handlers/processYoutubeFile.mjs";
 
+
 const jwtSecret = process.env.JWT_SECRET;
-const ALLOWED_FILE_TYPES = ["audio/mp3", "audio/mp4", "audio/wav", "audio/m4a"];
+const ALLOWED_FILE_TYPES = ['audio/mp3', 'audio/mp4', 'audio/wav', 'audio/m4a']
 
 /**
  * Handle an AWS Lambda event.
@@ -20,37 +20,41 @@ const myHandler = async (event, context) => {
   try {
     await mongooseConnect();
     const userEmail = event.user.email;
-    const audioFileObj = JSON.parse(event.body);
-    const filename = audioFileObj.filename;
-    const language = audioFileObj.language;
-    const enableSpeakerDiarization = audioFileObj.enableSpeakerDiarization;
-    const speakerCount = audioFileObj.minSpeakerCount;
-    const dateAdded = audioFileObj.dateAdded;
-    const description = audioFileObj.description;
-    const fileType = audioFileObj.fileType;
+    const {
+      filename,
+      language,
+      enableSpeakerDiarization,
+      minSpeakerCount,
+      dateAdded,
+      description,
+      fileType,
+    } = JSON.parse(event.body);
 
-    if (!audioFileObj.userEmail || !audioFileObj.filename || !audioFileObj.dateAdded) {
+    if (!userEmail || !filename || !dateAdded) {
       throw new Error("Data validation failed.");
     }
 
+    const fileData = {
+      userEmail,
+      filename,
+      language,
+      enableSpeakerDiarization,
+      minSpeakerCount,
+      description,
+      dateAdded,
+      fileType,
+    };
+
     switch (event.routeKey) {
       case "POST /api/v1/audio-files/process-audio-file":
-        return await processAudioFile(audioFileObj);
+        return await processAudioFile(fileData);
+        // TODO: delete old audio file from gcp bucket, if file is converted to wav
       case "POST /api/v1/youtube/process-audio-file":
-        return await processYoutubeFile(audioFileObj);
+        return await processYoutubeFile(fileData);
+        // TODO: delete audio from gcp bucket 
       default:
         return createResponse(404, { error: "Not Found" });
     }
-
-    // const { transcript, notes } = await mainHandler(
-    //   userEmail,
-    //   filename,
-    //   language,
-    //   enableSpeakerDiarization,
-    //   speakerCount,
-    //   description,
-    //   dateAdded
-    // );
   } catch (error) {
     console.log(error);
     return createResponse(500, { error: error.message });

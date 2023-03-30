@@ -80,8 +80,8 @@ export const convertFileToWavAndUploadToGcp = async (
   const inputFileName = `${userEmail}/${filename}`;
   const outputFileName = `${userEmail}/${changeFileExtension(filename)}`;
 
-  const inputFilePath = `/${inputFileName}`;
-  const outputFilePath = `/${outputFileName}`;
+  const inputFilePath = `/tmp/${inputFileName}`;
+  const outputFilePath = `/tmp/${outputFileName}`;
 
   // Download the file from the Google Cloud Storage bucket
   await storage
@@ -101,7 +101,7 @@ export const convertFileToWavAndUploadToGcp = async (
   });
 
   // Upload the converted WAV file back to the Google Cloud Storage bucket
-  return await storage
+  await storage
     .bucket(BUCKET_NAME)
     .upload(outputFilePath, { destination: outputFileName });
 };

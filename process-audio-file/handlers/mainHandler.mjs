@@ -1,65 +1,26 @@
-import { createTranscript } from "../helpers/createTranscript.mjs";
-import { createNotes } from "../helpers/createNotes.mjs";
-import { saveNotes } from "../helpers/saveNotes.mjs";
-import { saveTranscript } from "../helpers/saveTranscript.mjs";
-import { saveFile } from "../helpers/saveFile.mjs";
+import {
+  createTranscript,
+  createNotes,
+  saveNotes,
+  saveTranscript,
+  saveFile,
+} from "../helpers/index.mjs";
 
-/**
- * Handle an AWS Lambda event.
- */
-export const mainHandler = async (
-  userEmail,
-  filename,
-  language,
-  enableSpeakerDiarization,
-  speakerCount,
-  description,
-  dateAdded
-) => {
+const createObj = (keys, data) => keys.reduce((acc, key) => ({ ...acc, [key]: data[key] }), {});
+
+export const mainHandler = async (fileData) => {
   try {
-    // create transcript using google speech-to-text api
-    const transcript = await createTranscript(
-      filename,
-      language,
-      enableSpeakerDiarization,
-      speakerCount,
-      userEmail
-    );
+    const transcript = await createTranscript(fileData);
+    const transcriptObj = createObj(["userEmail", "filename", "transcript"], fileData);
+    await saveTranscript(transcriptObj, fileData.enableSpeakerDiarization);
 
-    // create transcript object to store in database
-    const transcriptObj = {
-      userEmail,
-      filename,
-      transcript,
-    };
-
-    // save transcript to database
-    await saveTranscript(transcriptObj, enableSpeakerDiarization);
-
-    // create notes using gpt-3.5 api
     const notes = await createNotes(transcript);
-
-    // create notes object to store in database
-    const notesObj = {
-      userEmail,
-      filename,
-      notes,
-    };
-
-    // save notes to database
+    const notesObj = createObj(["userEmail", "filename", "notes"], fileData);
     await saveNotes(notesObj);
 
-    // create file object to store in database
-    const fileObj = {
-      userEmail,
-      filename,
-      description,
-      dateAdded,
-    };
+    const fileObj = createObj(["userEmail", "filename", "description", "dateAdded"], fileData);
+    await saveFile(fileObj, fileData.enableSpeakerDiarization, fileData.speakerCount);
 
-    // save file to database
-    await saveFile(fileObj, enableSpeakerDiarization, speakerCount);
-    
     return { transcript, notes };
   } catch (error) {
     console.log(error);
