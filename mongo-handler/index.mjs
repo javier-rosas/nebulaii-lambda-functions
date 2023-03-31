@@ -7,7 +7,7 @@ import { deleteFileByUserEmailAndFilename } from "./handlers/fileHandler.mjs";
 import { getDiarizedTranscriptByUserEmailAndFilename } from "./handlers/diarizedTranscriptHandler.mjs";
 import { getFilesByUserEmail } from "./handlers/fileHandler.mjs";
 import { mongooseConnect } from "./mongoose/mongooseConnect.mjs";
-import { createResponse } from "./utils/responseUtils.mjs";
+import { createResponse } from "./utils/createResponse.mjs";
 import UserDao from "./daos/UserDao.mjs";
 import FileDao from "./daos/FileDao.mjs";
 import TranscriptDao from "./daos/TranscriptDao.mjs";
