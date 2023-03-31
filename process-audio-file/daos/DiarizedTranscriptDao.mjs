@@ -13,6 +13,7 @@ export default class DiarizedTranscriptDao {
   constructor() {}
 
   createOrUpdateDiarizedTranscript = async (transcriptObj) => {
+    console.log("createOrUpdateDiarizedTranscript", transcriptObj)
     try {
       const filter = {
         userEmail: transcriptObj.userEmail,

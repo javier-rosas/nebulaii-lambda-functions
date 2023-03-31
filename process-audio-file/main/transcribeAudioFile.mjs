@@ -37,15 +37,11 @@ export async function transcribeAudioFile(
     .map((result) => result.alternatives[0].transcript)
     .join("\n");
 
-  console.log("here 3")
-
   if (enableSpeakerDiarization) {
     const result = response.results[response.results.length - 1];
     const wordsInfo = result.alternatives[0].words;
     transcription = convertWordArrToSentenceArr(wordsInfo);
   }
-
-  console.log("here 4")
-
+  
   return transcription
 }

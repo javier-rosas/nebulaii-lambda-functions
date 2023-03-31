@@ -14,7 +14,8 @@ export default class FileDao {
 
   createOrUpdateFile = async (fileObj) => {
     try {
-      console.log(fileObj)
+      fileObj = { ...fileObj, dateAdded: new Date()}
+      console.log("createOrUpdateFile", fileObj)
       const filter = {
         userEmail: fileObj.userEmail,
         filename: fileObj.filename,

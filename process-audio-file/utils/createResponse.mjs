@@ -4,7 +4,9 @@
  * @param {object} body - The response body.
  * @returns {object} - The response object.
  */
-export const createResponse = (statusCode, body) => ({
-  statusCode,
-  body: JSON.stringify(body),
-});
+export const createResponse = (statusCode, body) => {
+  return {
+    statusCode,
+    body: JSON.stringify(body)
+  }
+};

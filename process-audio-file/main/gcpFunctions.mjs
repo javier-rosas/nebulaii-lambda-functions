@@ -1,11 +1,16 @@
 import { Storage } from "@google-cloud/storage";
 import ytdl from "ytdl-core";
 import ffmpeg from "fluent-ffmpeg";
-import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
+// import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { changeFileExtension } from "../utils/changeFileExtension.mjs";
 
 const storage = new Storage();
-const BUCKET_NAME = process.env.GCP_BUCKET_NAME;
+const BUCKET_NAME = process.env.BUCKET_NAME;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export const deleteFileFromGcpBucketByUserEmailAndFilename = async (
   userEmail,
@@ -75,7 +80,9 @@ export const convertFileToWavAndUploadToGcp = async (
   userEmail,
   filename
 ) => {
-  ffmpeg.setFfmpegPath(ffmpegPath);
+  // ffmpeg.setFfmpegPath(ffmpegPath);
+  ffmpeg.setFfmpegPath(`${__dirname}/bin/ffmpeg`);
+
 
   const inputFileName = `${userEmail}/${filename}`;
   const outputFileName = `${userEmail}/${changeFileExtension(filename)}`;

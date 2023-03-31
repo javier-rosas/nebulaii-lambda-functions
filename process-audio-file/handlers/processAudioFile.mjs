@@ -1,7 +1,8 @@
 import { mainHandler } from "./mainHandler.mjs";
 import { convertFileToWavAndUploadToGcp } from "../main/gcpFunctions.mjs";
+import { createResponse } from "../utils/createResponse.mjs";
 
-const ALLOWED_FILE_TYPES = ["audio/mp3", "audio/mp4", "audio/wav", "audio/m4a"];
+const ALLOWED_FILE_TYPES = ['audio/mpeg','audio/mp3', 'audio/mp4', 'audio/wav', 'audio/m4a']
 
 export const processAudioFile = async (fileData) => {
   try {
@@ -12,7 +13,7 @@ export const processAudioFile = async (fileData) => {
       throw new Error("File type not allowed.");
 
     if (fileType !== "audio/wav")
-      convertFileToWavAndUploadToGcp(fileData.userEmail, fileData.filename);
+      await convertFileToWavAndUploadToGcp(fileData.userEmail, fileData.filename);
 
     const { transcript, notes } = await mainHandler(fileData);
 
